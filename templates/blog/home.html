@@ -6,48 +6,50 @@
 {% block content %}
 <div class="animate-fade-in">
     <!-- Featured Hero Post (only on page 1 of general listing without active filter/search) -->
-    {% if featured_post and not is_paginated or page_obj.number == 1 and not search_query and not selected_category %}
-        <section class="mb-5">
-            <div class="featured-hero p-4 p-md-5">
-                <div class="row align-items-center g-4">
-                    <div class="col-lg-7">
-                        {% if featured_post.banner %}
-                            <img src="{{ featured_post.banner.url }}" alt="{{ featured_post.title }}" class="featured-img img-fluid">
-                        {% else %}
-                            <img src="{% static 'images/default-banner.png' %}" alt="Placeholder" class="featured-img img-fluid">
-                        {% endif %}
-                    </div>
-                    <div class="col-lg-5">
-                        <div class="d-flex align-items-center mb-3">
-                            <span class="badge-premium me-2">Featured Story</span>
-                            {% if featured_post.category %}
-                                <a href="?category={{ featured_post.category.slug }}" class="text-decoration-none text-muted small font-weight-bold">
-                                    #{{ featured_post.category.name }}
-                                </a>
-                            {% endif %}
-                        </div>
-                        <h1 class="display-5 font-weight-bold mb-3">
-                            <a href="{{ featured_post.get_absolute_url }}" class="text-primary text-decoration-none">{{ featured_post.title }}</a>
-                        </h1>
-                        <p class="text-muted mb-4">{{ featured_post.content|truncatewords:28 }}</p>
-                        
-                        <div class="d-flex align-items-center mb-4">
-                            {% if featured_post.author.profile.avatar %}
-                                <img src="{{ featured_post.author.profile.avatar.url }}" alt="{{ featured_post.author.username }}" class="profile-avatar-sm me-2">
+    {% if featured_post %}
+        {% if not is_paginated or page_obj.number == 1 and not search_query and not selected_category %}
+            <section class="mb-5">
+                <div class="featured-hero p-4 p-md-5">
+                    <div class="row align-items-center g-4">
+                        <div class="col-lg-7">
+                            {% if featured_post.banner %}
+                                <img src="{{ featured_post.banner.url }}" alt="{{ featured_post.title }}" class="featured-img img-fluid">
                             {% else %}
-                                <i class="bi bi-person-circle fs-4 text-muted me-2"></i>
+                                <img src="{% static 'images/default-banner.png' %}" alt="Placeholder" class="featured-img img-fluid">
                             {% endif %}
-                            <div>
-                                <h6 class="mb-0 text-primary">{{ featured_post.author.username }}</h6>
-                                <small class="text-muted">{{ featured_post.created_on|date:"F d, Y" }}</small>
-                            </div>
                         </div>
-                        
-                        <a href="{{ featured_post.get_absolute_url }}" class="btn btn-premium">Read Story</a>
+                        <div class="col-lg-5">
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="badge-premium me-2">Featured Story</span>
+                                {% if featured_post.category %}
+                                    <a href="?category={{ featured_post.category.slug }}" class="text-decoration-none text-muted small font-weight-bold">
+                                        #{{ featured_post.category.name }}
+                                    </a>
+                                {% endif %}
+                            </div>
+                            <h1 class="display-5 font-weight-bold mb-3">
+                                <a href="{{ featured_post.get_absolute_url }}" class="text-primary text-decoration-none">{{ featured_post.title }}</a>
+                            </h1>
+                            <p class="text-muted mb-4">{{ featured_post.content|truncatewords:28 }}</p>
+                            
+                            <div class="d-flex align-items-center mb-4">
+                                {% if featured_post.author.profile.avatar %}
+                                    <img src="{{ featured_post.author.profile.avatar.url }}" alt="{{ featured_post.author.username }}" class="profile-avatar-sm me-2">
+                                {% else %}
+                                    <i class="bi bi-person-circle fs-4 text-muted me-2"></i>
+                                {% endif %}
+                                <div>
+                                    <h6 class="mb-0 text-primary">{{ featured_post.author.username }}</h6>
+                                    <small class="text-muted">{{ featured_post.created_on|date:"F d, Y" }}</small>
+                                </div>
+                            </div>
+                            
+                            <a href="{{ featured_post.get_absolute_url }}" class="btn btn-premium">Read Story</a>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
+        {% endif %}
     {% endif %}
 
     <!-- List & Sidebar Section -->
