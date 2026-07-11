@@ -1,0 +1,43 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}Login - Chronicle{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center animate-fade-in">
+    <div class="col-md-6 col-lg-4">
+        <div class="profile-card">
+            <h2 class="text-center font-weight-bold text-primary mb-4">Welcome Back</h2>
+            
+            {% if form.errors %}
+                <div class="alert alert-danger border-0 rounded-3 shadow-sm" role="alert">
+                    Your username and password didn't match. Please try again.
+                </div>
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label for="id_username" class="form-label text-primary font-weight-medium">Username</label>
+                    <input type="text" name="username" autofocus maxlength="150" class="form-control" placeholder="Enter username" required id="id_username">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="id_password" class="form-label text-primary font-weight-medium">Password</label>
+                    <input type="password" name="password" class="form-control" placeholder="Enter password" required id="id_password">
+                </div>
+
+                <button type="submit" class="btn btn-premium w-100 py-2 mb-3">
+                    Login
+                </button>
+            </form>
+
+            <div class="text-center mt-3">
+                <p class="text-muted small mb-0">
+                    New to Chronicle? <a href="{% url 'signup' %}" class="font-weight-medium text-decoration-none text-accent">Create an account</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

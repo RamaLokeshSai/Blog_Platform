@@ -1,0 +1,175 @@
+{% extends 'blog/base.html' %}
+{% load static %}
+
+{% block title %}Chronicle - Stories, Ideas & Writing{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <!-- Featured Hero Post (only on page 1 of general listing without active filter/search) -->
+    {% if featured_post and not is_paginated or page_obj.number == 1 and not search_query and not selected_category %}
+        <section class="mb-5">
+            <div class="featured-hero p-4 p-md-5">
+                <div class="row align-items-center g-4">
+                    <div class="col-lg-7">
+                        {% if featured_post.banner %}
+                            <img src="{{ featured_post.banner.url }}" alt="{{ featured_post.title }}" class="featured-img img-fluid">
+                        {% else %}
+                            <img src="{% static 'images/default-banner.png' %}" alt="Placeholder" class="featured-img img-fluid">
+                        {% endif %}
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="badge-premium me-2">Featured Story</span>
+                            {% if featured_post.category %}
+                                <a href="?category={{ featured_post.category.slug }}" class="text-decoration-none text-muted small font-weight-bold">
+                                    #{{ featured_post.category.name }}
+                                </a>
+                            {% endif %}
+                        </div>
+                        <h1 class="display-5 font-weight-bold mb-3">
+                            <a href="{{ featured_post.get_absolute_url }}" class="text-primary text-decoration-none">{{ featured_post.title }}</a>
+                        </h1>
+                        <p class="text-muted mb-4">{{ featured_post.content|truncatewords:28 }}</p>
+                        
+                        <div class="d-flex align-items-center mb-4">
+                            {% if featured_post.author.profile.avatar %}
+                                <img src="{{ featured_post.author.profile.avatar.url }}" alt="{{ featured_post.author.username }}" class="profile-avatar-sm me-2">
+                            {% else %}
+                                <i class="bi bi-person-circle fs-4 text-muted me-2"></i>
+                            {% endif %}
+                            <div>
+                                <h6 class="mb-0 text-primary">{{ featured_post.author.username }}</h6>
+                                <small class="text-muted">{{ featured_post.created_on|date:"F d, Y" }}</small>
+                            </div>
+                        </div>
+                        
+                        <a href="{{ featured_post.get_absolute_url }}" class="btn btn-premium">Read Story</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    {% endif %}
+
+    <!-- List & Sidebar Section -->
+    <div class="row g-5">
+        <!-- Main Posts List -->
+        <div class="col-lg-8">
+            <h3 class="mb-4 font-weight-bold text-primary">
+                {% if selected_category %}
+                    Topic: {{ selected_category|title }}
+                {% elif search_query %}
+                    Search results for "{{ search_query }}"
+                {% else %}
+                    Recent Stories
+                {% endif %}
+            </h3>
+
+            {% if posts %}
+                <div class="row row-cols-1 row-cols-md-2 g-4 mb-5">
+                    {% for post in posts %}
+                        <div class="col">
+                            <article class="card-premium">
+                                <a href="{{ post.get_absolute_url }}">
+                                    {% if post.banner %}
+                                        <img src="{{ post.banner.url }}" class="card-img-top" alt="{{ post.title }}">
+                                    {% else %}
+                                        <img src="{% static 'images/default-banner.png' %}" class="card-img-top" alt="Placeholder">
+                                    {% endif %}
+                                </a>
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        {% if post.category %}
+                                            <span class="badge-premium">{{ post.category.name }}</span>
+                                        {% endif %}
+                                        <small class="text-muted">{{ post.created_on|date:"M d, Y" }}</small>
+                                    </div>
+                                    <h4 class="card-title h5 mb-3 font-weight-bold">
+                                        <a href="{{ post.get_absolute_url }}" class="text-primary text-decoration-none">{{ post.title }}</a>
+                                    </h4>
+                                    <p class="card-text text-muted mb-4">{{ post.content|truncatewords:18 }}</p>
+                                    
+                                    <div class="d-flex align-items-center justify-content-between mt-auto">
+                                        <div class="d-flex align-items-center">
+                                            {% if post.author.profile.avatar %}
+                                                <img src="{{ post.author.profile.avatar.url }}" alt="{{ post.author.username }}" class="profile-avatar-sm me-2">
+                                            {% else %}
+                                                <i class="bi bi-person-circle fs-5 text-muted me-2"></i>
+                                            {% endif %}
+                                            <span class="small text-primary font-weight-medium">{{ post.author.username }}</span>
+                                        </div>
+                                        <span class="small text-muted">
+                                            <i class="bi bi-heart-fill text-danger me-1"></i>{{ post.total_likes }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if is_paginated %}
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link border-0 rounded-3 bg-card text-primary shadow-sm px-4 py-2 me-2" href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo; Previous</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            
+                            <li class="page-item disabled">
+                                <span class="page-link border-0 rounded-3 bg-card text-muted shadow-sm px-4 py-2 me-2">
+                                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                                </span>
+                            </li>
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link border-0 rounded-3 bg-card text-primary shadow-sm px-4 py-2" href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}page={{ page_obj.next_page_number }}" aria-label="Next">
+                                        <span aria-hidden="true">Next &raquo;</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-journal-x fs-1 text-muted mb-3"></i>
+                    <p class="fs-5 text-muted">No stories found. Try a different search query or write a new one!</p>
+                    <a href="{% url 'post_create' %}" class="btn btn-premium mt-2">Write a Story</a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Sidebar Card: Categories -->
+            <div class="profile-card mb-4">
+                <h4 class="h5 mb-3 font-weight-bold text-primary">Topics</h4>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'home' %}" class="btn btn-sm {% if not selected_category %}btn-premium{% else %}btn-outline-premium{% endif %}">
+                        All Topics
+                    </a>
+                    {% for category in categories %}
+                        <a href="?category={{ category.slug }}" class="btn btn-sm {% if selected_category == category.slug %}btn-premium{% else %}btn-outline-premium{% endif %}">
+                            {{ category.name }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Sidebar Card: About -->
+            <div class="profile-card mb-4">
+                <h4 class="h5 mb-3 font-weight-bold text-primary">Welcome to Chronicle</h4>
+                <p class="text-muted small mb-0">
+                    Chronicle is a digital space for writer enthusiasts to publish thoughts, code, designs, and discoveries. Dive into any topic and start pair-programming your writing journey today.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

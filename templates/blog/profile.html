@@ -1,0 +1,172 @@
+{% extends 'blog/base.html' %}
+{% load static %}
+
+{% block title %}{{ profile_user.username }}'s Profile - Chronicle{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <div class="row g-5">
+        <!-- Sidebar profile detail or update -->
+        <div class="col-lg-4">
+            <div class="profile-card text-center mb-4">
+                {% if profile_user.profile.avatar %}
+                    <img src="{{ profile_user.profile.avatar.url }}" alt="{{ profile_user.username }}" class="profile-avatar mb-3" style="width: 120px; height: 120px;">
+                {% else %}
+                    <i class="bi bi-person-circle text-muted mb-3 d-inline-block" style="font-size: 120px; line-height: 1;"></i>
+                {% endif %}
+                
+                <h3 class="font-weight-bold text-primary mb-1">{{ profile_user.username }}</h3>
+                <p class="text-muted small mb-3">Member since {{ profile_user.date_joined|date:"F Y" }}</p>
+                
+                {% if profile_user.profile.bio %}
+                    <p class="text-primary mb-3 small">{{ profile_user.profile.bio }}</p>
+                {% else %}
+                    <p class="text-muted mb-3 small italic">No bio written yet.</p>
+                {% endif %}
+
+                {% if profile_user.profile.website %}
+                    <a href="{{ profile_user.profile.website }}" target="_blank" class="btn btn-sm btn-outline-premium w-100 mb-3">
+                        <i class="bi bi-globe me-2"></i>Visit Website
+                    </a>
+                {% endif %}
+
+                <!-- Statistics -->
+                <div class="row g-2 border-top border-color pt-3 mt-3">
+                    <div class="col-6">
+                        <h5 class="mb-0 text-primary font-weight-bold">{{ posts.count }}</h5>
+                        <small class="text-muted text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.05em;">Stories</small>
+                    </div>
+                    <div class="col-6">
+                        <h5 class="mb-0 text-primary font-weight-bold">
+                            {% if profile_user.blog_posts.exists %}
+                                {{ profile_user.blog_posts.first.likes.count }}
+                            {% else %}
+                                0
+                            {% endif %}
+                        </h5>
+                        <small class="text-muted text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.05em;">Likes Recv</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit profile form (only if own profile) -->
+            {% if is_own_profile %}
+                <div class="profile-card">
+                    <h4 class="h5 font-weight-bold text-primary mb-3">Edit Profile Settings</h4>
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-primary small font-weight-medium">Username</label>
+                            {{ u_form.username }}
+                            {% if u_form.username.errors %}
+                                <div class="text-danger small mt-1">{{ u_form.username.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-primary small font-weight-medium">Email Address</label>
+                            {{ u_form.email }}
+                            {% if u_form.email.errors %}
+                                <div class="text-danger small mt-1">{{ u_form.email.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-primary small font-weight-medium">Bio Description</label>
+                            {{ p_form.bio }}
+                            {% if p_form.bio.errors %}
+                                <div class="text-danger small mt-1">{{ p_form.bio.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-primary small font-weight-medium">Website Link</label>
+                            {{ p_form.website }}
+                            {% if p_form.website.errors %}
+                                <div class="text-danger small mt-1">{{ p_form.website.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label text-primary small font-weight-medium d-block">Avatar Picture</label>
+                            {{ p_form.avatar }}
+                            {% if p_form.avatar.errors %}
+                                <div class="text-danger small mt-1">{{ p_form.avatar.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <button type="submit" class="btn btn-premium w-100">
+                            <i class="bi bi-save-fill me-2"></i>Save Changes
+                        </button>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Main section showing stories list -->
+        <div class="col-lg-8">
+            <h3 class="mb-4 font-weight-bold text-primary">
+                {% if is_own_profile %}My Stories{% else %}{{ profile_user.username }}'s Stories{% endif %}
+            </h3>
+
+            {% if posts %}
+                <div class="d-flex flex-column gap-4">
+                    {% for post in posts %}
+                        <div class="card-premium p-4">
+                            <div class="row align-items-center g-4">
+                                <div class="col-md-3">
+                                    {% if post.banner %}
+                                        <img src="{{ post.banner.url }}" alt="{{ post.title }}" class="img-fluid rounded-3" style="width: 100%; height: 120px; object-fit: cover;">
+                                    {% else %}
+                                        <img src="{% static 'images/default-banner.png' %}" alt="Placeholder" class="img-fluid rounded-3" style="width: 100%; height: 120px; object-fit: cover;">
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-9">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            {% if post.category %}
+                                                <span class="badge-premium">{{ post.category.name }}</span>
+                                            {% endif %}
+                                            {% if post.status == 'draft' %}
+                                                <span class="badge bg-secondary text-light px-2 py-1 text-uppercase small" style="font-size: 0.65rem; border-radius: 4px;">Draft</span>
+                                            {% endif %}
+                                        </div>
+                                        <small class="text-muted">{{ post.created_on|date:"M d, Y" }}</small>
+                                    </div>
+                                    <h4 class="h5 mb-2 font-weight-bold">
+                                        <a href="{{ post.get_absolute_url }}" class="text-primary text-decoration-none">{{ post.title }}</a>
+                                    </h4>
+                                    <p class="text-muted small mb-3">{{ post.content|truncatewords:20 }}</p>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="text-muted small">
+                                            <span class="me-3"><i class="bi bi-heart-fill text-danger me-1"></i>{{ post.total_likes }} likes</span>
+                                            <span><i class="bi bi-chat-fill text-muted me-1"></i>{{ post.comments.count }} comments</span>
+                                        </div>
+                                        
+                                        {% if is_own_profile %}
+                                            <div class="d-flex gap-2">
+                                                <a href="{% url 'post_update' slug=post.slug %}" class="btn btn-sm btn-outline-premium py-1 px-3">Edit</a>
+                                                <a href="{% url 'post_delete' slug=post.slug %}" class="btn btn-sm btn-outline-danger py-1 px-3" style="border-radius: 8px;">Delete</a>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5 profile-card">
+                    <i class="bi bi-journal-text fs-1 text-muted mb-3 d-block"></i>
+                    <p class="fs-5 text-muted mb-3">No stories published yet.</p>
+                    {% if is_own_profile %}
+                        <a href="{% url 'post_create' %}" class="btn btn-premium">Write Your First Story</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
